@@ -64,6 +64,57 @@ describe('UNIT ' + name, function () {
         });
     });
 
+    describe('timeAllWeek()', function () {
+        it('adds every day to bare times', function () {
+            var state = {
+                tokens: [
+                    { type: 'time', value: { hrs: 9, mins: 0 } },
+                    { type: 'time', value: { hrs: 10, mins: 0 } }
+                ]
+            };
+            var expected = { tokens: [
+                { type: 'days', value: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] },
+                { type: 'time', value: { hrs: 9, mins: 0 } },
+                { type: 'operation', value: 'through' },
+                { type: 'time', value: { hrs: 10, mins: 0 } }
+            ] };
+            var actual = parser.timeAllWeek(state);
+            actual.should.deep.equal(expected);
+        });
+
+        it('adds every day to bare time ranges', function () {
+            var state = {
+                tokens: [
+                    { type: 'time', value: { hrs: 9, mins: 0 } },
+                    { type: 'operation', value: 'through' },
+                    { type: 'time', value: { hrs: 10, mins: 0 } }
+                ]
+            };
+            var expected = { tokens: [
+                { type: 'days', value: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] },
+                { type: 'time', value: { hrs: 9, mins: 0 } },
+                { type: 'operation', value: 'through' },
+                { type: 'time', value: { hrs: 10, mins: 0 } }
+            ] };
+            var actual = parser.timeAllWeek(state);
+            actual.should.deep.equal(expected);
+        });
+
+        it('adds every day to 24 hours', function () {
+            var state = {
+                tokens: [
+                    { type: 'time', value: { allDay: true } }
+                ]
+            };
+            var expected = { tokens: [
+                { type: 'days', value: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] },
+                { type: 'time', value: { allDay: true } }
+            ] };
+            var actual = parser.timeAllWeek(state);
+            actual.should.deep.equal(expected);
+        });
+    });
+
     describe('doOperations() with throughOp()', function () {
         it('should remove through operation if at end', function () {
             var state = {
@@ -442,7 +493,7 @@ describe('UNIT ' + name, function () {
             actual.should.deep.equal(expected);
         });
 
-        var twentyFourHourVariants = ['24 hours, 7 days', '24/7', '24 / 7', '24-7', 'Daily 24 hours', 'everyday', 'Sun-Sat 24 Hours'];
+        var twentyFourHourVariants = ['24 hours, 7 days', '24/7', '24 / 7', '24-7', 'Daily 24 hours', '24 Hours', 'everyday', 'Sun-Sat 24 Hours'];
         twentyFourHourVariants.forEach(function (variant) {
             it('should parse out string ' + variant, function () {
                 var expected = { everyDayAllTime: true };
