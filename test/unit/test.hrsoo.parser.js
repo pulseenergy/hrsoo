@@ -362,6 +362,27 @@ describe('UNIT ' + name, function () {
             var actual = parser.getTimeProfile(ranges);
             actual.should.deep.equal(expected);
         });
+
+        it('should return a time profile for early morning', function () {
+            var ranges = [{ start: 0, end: 200 }];
+            var expected = { '000': true, '030': true, '100': true, '130': true };
+            var actual = parser.getTimeProfile(ranges);
+            actual.should.deep.equal(expected);
+        });
+
+        it('should return a time profile wrapping around midnight', function () {
+            var ranges = [{ start: 2300, end: 100 }];
+            var expected = { '2300': true, '2330': true, '000': true, '030': true };
+            var actual = parser.getTimeProfile(ranges);
+            actual.should.deep.equal(expected);
+        });
+
+        it('should return a time profile respecting quarter hours', function () {
+            var ranges = [{ start: 0, end: 145 }];
+            var expected = { '000': true, '030': true, '100': true, '030': true };
+            var actual = parser.getTimeProfile(ranges);
+            actual.should.deep.equal(expected);
+        });
     });
 
     describe('getDayTimes()', function () {
@@ -391,7 +412,29 @@ describe('UNIT ' + name, function () {
             var actual = parser.getDayTimes(state);
             actual.should.deep.equal(expected);
         });
-        it('should get from day - time combos - but not upwards of 2400', function () {
+
+        it('should get from day - time combos and handle past midnight', function () {
+            var state = {
+                tokens: [
+                    { type: 'days', value: ['monday']},
+                    { type: 'time', value: { ranges: [{ start: 2300, end: 100 }]}}
+                ]
+            };
+            var expected = {
+                isAllWeekSameTime: false,
+                monday: {
+                    '2300': true,
+                    '2330': true,
+                    '000': true,
+                    '030': true
+                },
+                timezone: 'est'
+            };
+            var actual = parser.getDayTimes(state);
+            actual.should.deep.equal(expected);
+        });
+
+        it('should get from day - time combos - but handles invalid end times', function () {
             var state = {
                 tokens: [
                     { type: 'days', value: ['monday', 'wednesday']},
@@ -555,6 +598,22 @@ describe('UNIT ' + name, function () {
             var expected = {
                 isAllWeekSameTime: false,
                 monday: {  '1100': true, '1130': true },
+                timezone: 'est'
+            };
+            var actual = parser.parse(hrsText);
+            actual.should.deep.equal(expected);
+        });
+
+        it('should parse string bordering midnight', function () {
+            var hrsText = 'Mon 11pm to 1am';
+            var expected = {
+                isAllWeekSameTime: false,
+                monday: {  
+                    '2300': true,
+                    '2330': true,
+                    '000': true,
+                    '030': true
+                },
                 timezone: 'est'
             };
             var actual = parser.parse(hrsText);
