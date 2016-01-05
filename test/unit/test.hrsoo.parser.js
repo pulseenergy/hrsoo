@@ -413,6 +413,22 @@ describe('UNIT ' + name, function () {
             actual.should.deep.equal(expected);
         });
 
+        it('should respect options.rangesOnly', function () {
+            var state = {
+                tokens: [
+                    { type: 'days', value: ['monday']},
+                    { type: 'time', value: { ranges: [{ start: 2300, end: 100 }]}}
+                ]
+            };
+            var expected = {
+                isAllWeekSameTime: false,
+                monday: [{ start: 2300, end: 100 }],
+                timezone: 'est'
+            };
+            var actual = parser.getDayTimes(state, { rangesOnly: true });
+            actual.should.deep.equal(expected);
+        });
+
         it('should get from day - time combos and handle past midnight', function () {
             var state = {
                 tokens: [
