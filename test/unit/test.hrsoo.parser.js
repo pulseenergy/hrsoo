@@ -247,7 +247,7 @@ describe('UNIT ' + name, function () {
                 tokens: [
                     { type: 'time', value: { hrs: 11, mins: 30 }, ampm: 'am' },
                     { type: 'operation', value: 'through' },
-                    { type: 'time', value: { hrs: 12, mins: 00 }, ampm: 'pm' }
+                    { type: 'time', value: { hrs: 12, mins: 0 }, ampm: 'pm' }
                 ]
             };
             var expected = {
@@ -379,7 +379,8 @@ describe('UNIT ' + name, function () {
 
         it('should return a time profile respecting quarter hours', function () {
             var ranges = [{ start: 0, end: 145 }];
-            var expected = { '000': true, '030': true, '100': true, '030': true };
+            var expected = { '000': true, '030': true, '100': true };
+            // 1:45 is treated as 1:30, and the map is exclusive
             var actual = parser.getTimeProfile(ranges);
             actual.should.deep.equal(expected);
         });
@@ -624,7 +625,7 @@ describe('UNIT ' + name, function () {
             var hrsText = 'Mon 11pm to 1am';
             var expected = {
                 isAllWeekSameTime: false,
-                monday: {  
+                monday: {
                     '2300': true,
                     '2330': true,
                     '000': true,
